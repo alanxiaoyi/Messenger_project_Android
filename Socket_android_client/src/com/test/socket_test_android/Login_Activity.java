@@ -3,6 +3,7 @@ package com.test.socket_test_android;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import testpack.serial_message;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,6 +27,7 @@ public class Login_Activity extends Activity {
     private static String KEY_NAME = "name";
     private static String KEY_EMAIL = "email";
     private static String KEY_CREATED_AT = "created_at";	
+    private Myapp myapp;
 	
     
 	public void onCreate(Bundle savedInstanceState) {
@@ -43,23 +45,41 @@ public class Login_Activity extends Activity {
 		
 		String email=inputEmail.getText().toString();
 		String password = inputPassword.getText().toString();
-		send_request request=new send_request();
+		send_request request=new send_request(Login_Activity.this);
 		JSONObject json=request.loginUser(email, password);
 		
 		try{
 			if(json.getString(KEY_SUCCESS)!=null){
 				loginErrorMsg.setText("");
 				  String res = json.getString(KEY_SUCCESS);
-                  if(Integer.parseInt(res) == 1){
+                  if(Integer.parseInt(res) == 1){			//successful log in
                 	  
-                	 JSONObject usr=json.getJSONObject("user");
-                	 
+                	 JSONObject usr=json.getJSONObject("user");               	 
                 	 loginErrorMsg.setText(usr.getString(KEY_NAME));
+                	 String my_email=usr.getString(KEY_EMAIL);
+                	 
+                	//create the connection
+                	 Socket_com mysocket=new Socket_com();
+                 	 mysocket.create_connect();		
+                 	 //send server a message to indicate login
+//                 	 json_message jmsg=new json_message("loginmsg", my_email,"","");
+                 	 serial_message sm=new serial_message();
+                 	 sm.setType("loginmsg");
+                 	 sm.setSender(my_email);
+                	 mysocket.sendmessage(sm); 
+                	 myapp=(Myapp)getApplication();		
+                	 
+                	//save the connection to global
+                	 myapp.set_socket(mysocket);
+                	 myapp.set_myemail(my_email);
+                	 	
+                 	chat_thread mythread=new chat_thread(my_email, mysocket, this);    //open a thread listening the socket
+                 	mythread.start();
                 	 
                 	 Intent intent = new Intent(this, Friendslist_activity.class);
-                	 intent.putExtra(EXTRA_MESSAGE, usr.getString(KEY_EMAIL));
+               	   //intent.putExtra(EXTRA_MESSAGE, usr.getString(KEY_EMAIL));
                 	 startActivity(intent); 
-     	  
+                
                   }
                   else{
                 	  loginErrorMsg.setText("Incorrect username");
@@ -77,7 +97,7 @@ public class Login_Activity extends Activity {
 		
 		String email=inputEmail.getText().toString();
 		String password = inputPassword.getText().toString();
-		send_request request=new send_request();
+		send_request request=new send_request(this);
 		JSONObject json=request.registerUser("name", email, password);
 		
 		try{
@@ -103,8 +123,4 @@ public class Login_Activity extends Activity {
 		
 	}	
 	
-	
-	
-	
-
 }

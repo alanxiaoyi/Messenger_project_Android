@@ -9,7 +9,7 @@
  *
  */
           require_once 'config.php';	
- //这个类的实例可以用db调用这些函数
+ //这个类的实例可以调用这些函数对db进行访问
  class DB_Functions {
 	private $con;
 	
@@ -53,18 +53,52 @@
  		}
  	}	
  	
+	
+	
+	
+  	public function deletefriend($myemail, $friendemail){
+  		
+  		$myid=mysqli_query($this->con, "SELECT unique_id FROM users WHERE email='$myemail'");
+  		if($myid){
+	  		$myid=mysqli_fetch_array($myid);
+	  		$myid=$myid['unique_id'];
+  		}
+  		$frid=mysqli_query($this->con, "SELECT unique_id FROM users WHERE email='$friendemail'");
+  		if($frid){
+	   		$frid=mysqli_fetch_array($frid);
+	  		$frid=$frid['unique_id'];
+  		}
+ 		$result = mysqli_query($this->con, "DELETE FROM friends WHERE UserID = '$myid' AND FriendID = '$frid'");
+		$result1= mysqli_query($this->con, "DELETE FROM friends WHERE UserID = '$frid' AND FriendID = '$myid'");
+ 		if($result || $result1){
+			return true;
+ 		}
+ 		else{
+ 			return false;  //insert fail
+ 		}
+ 	}	
+	
+	
+	
+	
+	
+	
+	
  	
  	public function getfriendinfo($myemail){
- 		
+ 		$friend_array1=array();
+		$friend_array2=array();
    		$myid=mysqli_query($this->con, "SELECT unique_id FROM users WHERE email='$myemail'");
     	if($myid){
 	  		$myid=mysqli_fetch_array($myid);
 	  		$myid=$myid['unique_id'];
   		}				
  		$result = mysqli_query($this->con, "SELECT FriendID FROM friends WHERE UserID = '$myid'"); 		
- 		$friend_array1=mysqli_fetch_array($result,MYSQLI_ASSOC);
+ 		while($row=mysqli_fetch_array($result,MYSQLI_NUM))
+			array_push($friend_array1,$row[0]);
  		$result = mysqli_query($this->con, "SELECT UserID FROM friends WHERE FriendID = '$myid'"); 				
-  		$friend_array2=mysqli_fetch_array($result,MYSQLI_ASSOC);
+  		while($row=mysqli_fetch_array($result,MYSQLI_NUM))
+			array_push($friend_array2,$row[0]);
   		if($friend_array1!=NULL &&$friend_array2!=NULL)
   			$friend_array=array_merge($friend_array1, $friend_array2);	
   		else if($friend_array1!=NULL)
@@ -76,8 +110,8 @@
   		foreach ($friend_array as $value){
     		$info=mysqli_query($this->con, "SELECT name, email FROM users WHERE unique_id='$value'"); 			
 	  		if($info){
-		  		$info=mysqli_fetch_array($info,MYSQLI_ASSOC);
-				array_push($friend_info,$info);
+		  		$row=mysqli_fetch_array($info,MYSQLI_ASSOC);
+				array_push($friend_info,$row);
   			}  			
   		}
   		return $friend_info;
@@ -91,20 +125,27 @@
   		if($myid){
 	  		$myid=mysqli_fetch_array($myid);
 	  		$myid=$myid['unique_id'];
+		//	echo $myid;
   		}
   		$frid=mysqli_query($this->con, "SELECT unique_id FROM users WHERE email='$friendemail'");
   		if($frid){
 	   		$frid=mysqli_fetch_array($frid);
 	  		$frid=$frid['unique_id'];
+		//	echo $frid;
   		}
   		
 		$result = mysqli_query($this->con, "SELECT FriendID FROM friends WHERE UserID = '$myid'"); 		
  		if(($result->num_rows)>0){
  			$num=$result->num_rows;
- 			$result=mysqli_fetch_array($result);
+//			echo "numberofrows: ";
+//			echo $num;
+ //			$row=mysqli_fetch_row($result);
+//			echo $row[0];
 			$i=0;
 			while ($i < $num) {
-				if($result[$i]==$frid) return true;				
+				$row=mysqli_fetch_row($result);
+//				echo $row[0]; echo " ";
+				if($row[0]==$frid) return true;				
 				$i++;
 			}		
  		}
@@ -112,10 +153,11 @@
  		$result = mysqli_query($this->con, "SELECT FriendID FROM friends WHERE UserID = '$frid'"); 		
  		if(($result->num_rows)>0){
  			$num=$result->num_rows;
- 			$result=mysqli_fetch_array($result);
+ 	//		$row=mysqli_fetch_row($result);
 			$i=0;
 			while ($i < $num) {
-				if($result[$i]==$frid) return true;				
+				$row=mysqli_fetch_row($result);
+				if($row[0]==$myid) return true;				
 				$i++;
 			}		
  		}

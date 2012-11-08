@@ -7,20 +7,19 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.util.List;
-	 
-	import org.apache.http.HttpEntity;
+
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.params.CoreProtocolPNames;
 import org.json.JSONException;
 import org.json.JSONObject;
-	 
+
 import android.util.Log;
-	 
+	// this is for the communication with server php and mysql, not for chat 
 	public class json_receive {
 	 
 	    static InputStream is = null;
@@ -36,7 +35,7 @@ import android.util.Log;
 	 
 	        // Making HTTP request
 	        try {
-	            // defaultHttpClient
+	            // sned the request
 	            DefaultHttpClient httpClient = new DefaultHttpClient();
 	            HttpPost httpPost = new HttpPost(url);
 	            httpPost.setEntity(new UrlEncodedFormEntity(params));
@@ -56,6 +55,7 @@ import android.util.Log;
 	        }
 	 
 	        try {
+	        	//get the respond
 	            BufferedReader reader = new BufferedReader(new InputStreamReader(
 	                    is, "iso-8859-1"), 8);
 	            StringBuilder sb = new StringBuilder();

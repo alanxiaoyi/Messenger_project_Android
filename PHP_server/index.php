@@ -51,10 +51,16 @@
             $response["error_msg"] = "alread friend";
             echo json_encode($response);
  		}
+		else if($myemail==$friendemail){
+			$response["error"]=1;
+			$response["error_msg"] = "you cannot add yourself";
+			 echo json_encode($response);
+		}
  		else{
 	 		$user=$db->addfriend($myemail,$friendemail);
 	 		if($user!=false){
 	                $response["success"] = 1;  
+					$response["error_msg"] = ""; 
 	                echo json_encode($response);       		      						
 	 		} 		
 	 		else{	
@@ -62,6 +68,38 @@
 	 		}
  		}
  	}	
+	
+ 	else if($tag=='deletefriend'){
+ 		$myemail = $_REQUEST['myemail'];
+ 		$friendemail=$_REQUEST['friendemail'];
+ 		if($db->ishasfriendship($myemail,$friendemail)){
+		
+			$user=$db->deletefriend($myemail,$friendemail);
+	 		if($user!=false){
+	                $response["success"] = 1;  
+					$response["error_msg"] = ""; 
+	                echo json_encode($response);       		      						
+	 		} 		
+	 		else{	
+	 			echo "add friend failed";
+	 		}
+	
+ 		}
+ 		else{
+            $response["error"] = 1;
+            $response["error_msg"] = "no friendship";
+            echo json_encode($response);
+ 		}
+ 	}		
+	
+	
+	
+	
+	
+	
+	
+	
+	
  	
  	else if($tag=='showfriends'){
  		

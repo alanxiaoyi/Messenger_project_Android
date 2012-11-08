@@ -1,18 +1,21 @@
 package com.test.socket_test_android;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-import android.os.Handler;
-import android.os.Message;
+import testpack.serial_message;
+import android.content.Context;
+import android.content.Intent;
 
 public class Socket_com {
-	static String IP_addr="10.0.1.8";
-	static int port_num=8888;
-	static Socket socket;
-	static String received_handle_message=new String();
+	
+	public String IP_addr="10.0.1.8";
+	public int port_num=8888;
+	public Socket socket;
+	public String received_handle_message=new String();
+	
 	
 	void create_connect(){		
 		try{
@@ -23,9 +26,59 @@ public class Socket_com {
 		}
 	}
 		
-
+//this was called by the chat_thread
+public void receivemessage(String myemail, Context context){
 	
-	public void receiveonemessage(){
+		
+		ObjectInputStream ois = null;
+		serial_message m;
+		try{
+			ois = new ObjectInputStream(socket.getInputStream());
+			m=(serial_message)(ois.readObject());
+			String[] message_string=new String[]{
+				m.getType(),
+				m.getSender(),
+				m.getReceiver(),
+				m.getContent(),
+		//		m.getString("time")				add later
+			};
+			
+			
+			Intent intent=new Intent("com.mymessenger.msg");
+			intent.putExtra("MSG", message_string);
+			
+			Context appcontext;
+			appcontext=context.getApplicationContext();
+			appcontext.sendBroadcast(intent);
+			
+		}catch(Exception e){
+	        manage_thread.thread_flag_container.put(myemail, false);
+			e.printStackTrace();
+		}
+	
+}
+
+// this will be called whenever send a JSON message
+public void sendmessage(serial_message message){
+	
+	
+	ObjectOutputStream oos=null;
+	
+	try {
+		oos = new ObjectOutputStream(socket.getOutputStream());
+		oos.writeObject(message);
+	}catch(Exception e){
+		e.printStackTrace();	
+		
+	}
+	
+}
+	
+	
+	
+	
+	
+/*	public void receiveonemessage(){
 		try{
 		byte[] receive_b=new byte[1024];
 		DataInputStream dis=new DataInputStream(socket.getInputStream());
@@ -70,6 +123,6 @@ public class Socket_com {
     }
    }	
 	
-	
+	*/
 
 }

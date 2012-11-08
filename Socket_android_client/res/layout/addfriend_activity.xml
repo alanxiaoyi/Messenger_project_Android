@@ -21,4 +21,11 @@
         android:onClick="click_add_friend"
         android:text="Button" />
 
+    <TextView
+        android:id="@+id/error_msg"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="msg"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
 </LinearLayout>
